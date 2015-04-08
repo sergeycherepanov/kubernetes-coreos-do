@@ -1,0 +1,150 @@
+#cloud-config
+---
+write_files:
+- path: /opt/etc/kubernetes-version
+  permissions: 0644
+  owner: root
+  content: "v0.14.1" # change it to actual release
+- path: /opt/bin/downloader.sh
+  permissions: 0744
+  owner: root
+  content: |
+    #!/usr/bin/bash
+    version=$(cat /opt/etc/kubernetes-version)
+    if [ ! -z ${1} ] && [ ! -z ${2} ]; then
+      if [ ! -d ${1} ]; then
+        /usr/bin/mkdir -p ${1}
+      fi
+      /usr/bin/wget -N -P ${1} https://storage.googleapis.com/kubernetes-release/release/${version}/bin/linux/amd64/${2}
+      /usr/bin/chmod +x ${1}/${2}
+    fi
+- path: /opt/bin/kubelet-service.sh
+  owner: root
+  permissions: 0744
+  content: |
+    #!/usr/bin/bash
+    ip=$(ip addr | grep inet | grep eth1 | grep global | awk '{print $2}' | sed -e 's/\/.*$//')
+    /opt/bin/kubelet \
+        --address=0.0.0.0 \
+        --port=10250 \
+        --hostname_override=${ip} \
+        --api_servers=%MASTER_IP%:8080
+- path: "/opt/bin/register-node.sh"
+  owner: root
+  permissions: 0744
+  content: |
+    #!/bin/bash
+    ip=$(ip addr | grep inet | grep eth1 | grep global | awk '{print $2}' | sed -e 's/\/.*$//')
+    name=$(hostname)
+    curl -X POST -d @- http://${1}/api/v1beta1/nodes << EOF
+    {
+      "id": "${ip}",
+      "kind": "Minion",
+      "apiVersion": "v1beta1",
+      "resources": {
+        "capacity": {
+          "cpu": 1000,
+          "memory": 1073741824
+        }
+      },
+      "externalID": "${ip}",
+      "labels": {
+        "name": "${name}"
+      }
+    }
+    EOF
+coreos:
+  fleet:
+    etcd-servers: http://%MASTER_IP%:4001
+    metadata: "role=node"
+  flannel:
+    interface: eth1
+    etcd_endpoints: http://%MASTER_IP%:4001
+  units:
+    - name: etcd.service
+      mask: true
+    - name: fleet.service
+      command: start
+    - name: flanneld.service
+      command: start
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            Requires=network-online.target
+            After=network-online.target
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup Network Environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStartPre=/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment 
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: docker.service
+      command: start
+      drop-ins:
+        - name: 51-docker-mirror.conf
+          content: |
+            [Unit]
+            # making sure that flanneld finished startup, otherwise containers
+            # won't land in flannel's network...
+            Requires=flanneld.service
+            After=flanneld.service
+            [Service]
+            Environment=DOCKER_OPTS='--registry-mirror=http://%MASTER_IP%:5000'
+    - name: kube-proxy.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Proxy
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+
+        [Service]
+        ExecStartPre=/opt/bin/downloader.sh /opt/bin kube-proxy
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
+        ExecStart=/opt/bin/kube-proxy \
+        --master=%MASTER_IP%:8080 \
+        --logtostderr=true
+        Restart=always
+        RestartSec=10
+    - name: kube-kubelet.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Kubelet
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+
+        [Service]
+        EnvironmentFile=/etc/network-environment
+        ExecStartPre=/opt/bin/downloader.sh /opt/bin kubelet
+        ExecStart=/opt/bin/kubelet-service.sh
+        Restart=always
+        RestartSec=10
+    - name: register-node.service
+      command: start
+      content: |
+        [Unit]
+        Description=Register Node on Master
+        Requires=kube-kubelet.service
+        After=kube-kubelet.service
+
+        [Service]
+        ExecStart=/opt/bin/register-node.sh %MASTER_IP%:8080
+        RemainAfterExit=yes
+        Type=oneshot
+  update:
+    group: stable
+    reboot-strategy: off
