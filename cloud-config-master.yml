@@ -171,7 +171,7 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=/opt/bin/downloader.sh /usr/bin kube-controller-manager
+        ExecStartPre=/opt/bin/downloader.sh /opt/bin kube-controller-manager
         ExecStart=/opt/bin/kube-controller-manager \
         --master=127.0.0.1:8080 \
         --logtostderr=true
