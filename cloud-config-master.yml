@@ -151,7 +151,6 @@ coreos:
         After=etcd.service
 
         [Service]
-        ExecStartPre=/usr/bin/mkdir -p /opt/bin
         ExecStartPre=/opt/bin/downloader.sh /opt/bin kube-apiserver
         ExecStart=/opt/bin/kube-apiserver \
         --address=0.0.0.0 \
@@ -172,7 +171,7 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=ExecStartPre=/opt/bin/downloader.sh /usr/bin kube-controller-manager
+        ExecStartPre=/opt/bin/downloader.sh /usr/bin kube-controller-manager
         ExecStart=/opt/bin/kube-controller-manager \
         --master=127.0.0.1:8080 \
         --logtostderr=true
@@ -188,7 +187,7 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStartPre=ExecStartPre=/opt/bin/downloader.sh /opt/bin kube-scheduler
+        ExecStartPre=/opt/bin/downloader.sh /opt/bin kube-scheduler
         ExecStart=/opt/bin/kube-scheduler --master=127.0.0.1:8080
         Restart=always
         RestartSec=10
