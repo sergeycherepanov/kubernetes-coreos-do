@@ -1,0 +1,14 @@
+{
+    "id": "service-nginx",
+    "kind": "Service",
+    "apiVersion": "v1beta1",
+    "port": 80,
+    "targetPort": "http-server",
+    "publicIPs":["%NODE_PUBLIC_IP%"],
+    "selector": {
+        "name": "pod-nginx"
+    },
+    "labels": {
+        "name": "service-nginx"
+    }
+}
