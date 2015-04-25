@@ -7,7 +7,7 @@ Kubernetes on CoreOS on DigitalOcean
 1. Select Size: Any
 1. Select Region: Any with private networking support
 1. Available Settings: "Private Networking", "Enable User Data"
-1. Put cloud-config to user data textarea
+1. Put [cloud-config](https://github.com/SergeyCherepanov/kubernetes-coreos-do/blob/master/cloud-config-master.yml) to user data textarea
 1. Select Image: CoreOS (stable)
 1. Choose you SSH key
 1. Press a "Create a Droplet" button
@@ -21,7 +21,7 @@ Take and remember internal ip address (Note: if you use other cloud provider, ne
 
     echo $(ip addr | grep inet | grep eth1 | grep global | awk '{print $2}' | sed -e 's/\/.*$//')
     
-Replace all %MASTER_IP% placeholders in node cloud-config to the master ip.
+Replace all %MASTER_IP% placeholders in node [cloud-config](https://github.com/SergeyCherepanov/kubernetes-coreos-do/blob/master/cloud-config-node.yml) to the master ip.
 
 ### Create node (minion) Instance
 Create a new droplet via DO interface, and choose following options 
