@@ -3,7 +3,7 @@ Kubernetes on CoreOS on DigitalOcean
 
 ### Create Master Instance
 1. Create a new droplet via DO interface, and choose following options 
-1. Droplet Hostname: saas-master
+1. Droplet Hostname: master
 1. Select Size: Any
 1. Select Region: Any with private networking support
 1. Available Settings: "Private Networking", "Enable User Data"
@@ -26,7 +26,7 @@ Replace all %MASTER_IP% placeholders in node cloud-config to the master ip.
 ### Create node (minion) Instance
 Create a new droplet via DO interface, and choose following options 
 
-1. Droplet Hostname: saas-node-001
+1. Droplet Hostname: node-001
 1. Select Size: Anyone you want
 1. Select Region: Must be same as the master node
 1. Available Settings: "Private Networking", "Enable User Data"
