@@ -4,7 +4,7 @@ write_files:
 - path: /opt/etc/kubernetes-version
   permissions: 0644
   owner: root
-  content: "v0.14.1" # change it to actual release
+  content: "v0.15.0" # change it to actual release
 - path: /opt/bin/downloader.sh
   permissions: 0744
   owner: root

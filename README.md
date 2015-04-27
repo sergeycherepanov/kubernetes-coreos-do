@@ -43,7 +43,7 @@ Login to your master instance:
 
 Download Kubectl:
 
-    sudo /usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.14.1/bin/linux/amd64/kubectl
+    sudo /usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/kubernetes-release/release/v0.15.0/bin/linux/amd64/kubectl
     sudo chmod +x /opt/bin/kubectl 
   
 Check whether the all your nodes registered in Kubernetes

@@ -1,31 +1,32 @@
 {
-    "id": "nginx-controller",
+    
     "kind": "ReplicationController",
-    "apiVersion": "v1beta1",
-    "desiredState": {
-        "replicas": 2,
-        "replicaSelector": {"name": "pod-nginx"},
-        "podTemplate": {
-            "desiredState": {
-                "manifest": {
-                    "version": "v1beta1",
-                    "id": "pod-nginx",
-                    "containers": [{
-                        "name": "pod-nginx",
-                        "image": "dockerfile/nginx",
-                        "ports": [{
-                            "name": "http-port",
-                            "containerPort": 80
-                        }]
-                    }]
-                }
-            },
-            "labels": {
-                "name": "pod-nginx"
-            }
+    "apiVersion": "v1beta3",
+    "metadata": {
+        "name": "nginx-controller",
+        "labels": {
+            "name": "rc-nginx"
         }
     },
-    "labels": {
-        "name": "rc-nginx"
+    "spec": {
+        "replicas": 2,
+        "selector": {"name": "pod-nginx"},
+        "template": {
+            "metadata": {
+                "labels": {
+                    "name": "pod-nginx"
+                }
+            },
+            "spec": {
+                "containers": [{
+                    "name": "pod-nginx",
+                    "image": "dockerfile/nginx",
+                    "ports": [{
+                        "name": "http-port",
+                        "containerPort": 80
+                    }]
+                }]
+            }
+        }
     }
 }
