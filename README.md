@@ -1,5 +1,5 @@
 # kubernetes-coreos-do
-Kubernetes on CoreOS on DigitalOcean 
+Walkthrough for setup Kubernetes on CoreOS on DigitalOcean.
 
 ### Create Master Instance
 1. Create a new droplet via DO interface, and choose following options 
