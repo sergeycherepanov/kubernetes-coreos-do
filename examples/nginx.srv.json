@@ -11,7 +11,7 @@
         "selector": {
             "name": "pod-nginx"
         },        
-        "ports": [{"port":80, "targetPort": "http-server"}],
+        "ports": [{"port":80, "targetPort": "http-port"}],
         "publicIPs":["%NODE_PUBLIC_IP%"]
     }
 }

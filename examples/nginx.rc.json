@@ -9,7 +9,7 @@
         }
     },
     "spec": {
-        "replicas": 2,
+        "replicas": 1,
         "selector": {"name": "pod-nginx"},
         "template": {
             "metadata": {
@@ -19,7 +19,7 @@
             },
             "spec": {
                 "containers": [{
-                    "name": "pod-nginx",
+                    "name": "nginx",
                     "image": "dockerfile/nginx",
                     "ports": [{
                         "name": "http-port",
